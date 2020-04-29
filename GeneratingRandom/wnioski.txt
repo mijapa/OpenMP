@@ -1,0 +1,11 @@
+kawałki są rozdzielane między wątki w sposób cykliczny
+
+static przydziela kawałki procesom po kolei - odpowiedni dla iteracji o stałym koszcie obliczeń
+dynamic przydziela kawałki dynamicznie w czasie wykonania dla lepszego balasnu
+guided jest podobny do dynamic ale rozmiar kawałków maleje aż do zadanego
+
+///////////////////////
+Intel© Core™ i5-7200U CPU @ 2.50GHz × 2 (4 wątki)
+
+dynamic ma najgorsze wyniki przy małym rozmiarze kawałka bo posiada duży narzut, w naszym przypadku koszt obliczeń jest stały więc balancing jest niepotrzebny
+guided daje najlepsze wynik bo zaczyna od dużych kawałków, zmniejszając je aż do zadanego rozmiaru
