@@ -42,12 +42,16 @@ int my_compare(const void *a, const void *b) {
     else return 1;
 }
 
-int main() {
+int main(int argc, char **argv) {
+//    rozmiar tablicy, liczba kubełków, liczba wątków
 //    omp_set_dynamic(0);     // Explicitly disable dynamic teams
-//    omp_set_num_threads(1); // Use 4 threads for all consecutive parallel regions
-    const int N = 1000 * 1000 * 100*2;
+    int N, k, t;
+    N = strtoul(argv[1], NULL, 10);
+    k = strtoul(argv[2], NULL, 10);
+    t = strtoul(argv[3], NULL, 10);
 
-//    const long int N = 1000 * 1000;
+    omp_set_num_threads(t);
+
     int n = sizeof(int)*N;
     int *A = malloc(n);
     if (A == NULL) {
@@ -82,8 +86,6 @@ int main() {
         int *B = malloc(sizeof(int) * N);
 
         //spread data to threads
-#pragma  omp barrier
-        double spreadStart = omp_get_wtime();
 
         for (int i = 0; i < N; ++i) {
             if (A[i] >= start && A[i] <= end) {
@@ -91,21 +93,11 @@ int main() {
             }
         }
 
-#pragma omp barrier
-        double spreadTime = omp_get_wtime() - spreadStart;
-        printf("b) spread time: %lf\n", spreadTime);
-
         global_elementsInBucket[my_id] = b_index;
 
         //sort values in bucket
-#pragma omp barrier
-        double sortStart = omp_get_wtime();
-
         qsort(B, b_index, sizeof(int), my_compare);
 
-#pragma omp barrier
-        double sortTime = omp_get_wtime() - sortStart;
-        printf("c) sort time: %lf\n", sortTime);
 
 
 #pragma omp barrier
@@ -126,17 +118,11 @@ int main() {
             A[global_startingPosition[my_id] + l] = B[l];
         }
 
-#pragma omp barrier
-        double mergingTime = omp_get_wtime() - mergingStart;
-        printf("d) merging time: %lf\n", mergingTime);
-
     };
-
 
     double parallelTime = omp_get_wtime() - parallel_start_time;
     printf("parallel time: %lf\n", parallelTime);
 
-//    printArray(N, A);
     checkIfSorted(N, A);
 
     free(A);
